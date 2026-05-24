@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Aviator Strategy Bot</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .dashboard {
+      max-width: 600px;
+      margin: 80px auto;
+      padding: 0 20px;
+    }
+    .dash-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .dash-card h2 { margin-bottom: 20px; font-size: 20px; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      background: var(--darker);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 14px;
+    }
+    .input-group input:focus { border-color: var(--primary); outline: none; }
+    .license-display {
+      background: var(--darker);
+      border: 1px solid var(--success);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      margin: 16px 0;
+    }
+    .license-display .key {
+      font-family: monospace;
+      font-size: 20px;
+      color: var(--success);
+      letter-spacing: 2px;
+      margin: 8px 0;
+      user-select: all;
+    }
+    .license-display .tier {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .btn-action {
+      padding: 10px 20px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      width: 100%;
+    }
+    .btn-action:hover { background: #d63853; }
+    .info { font-size: 13px; color: var(--muted); margin-top: 12px; }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .status-active { background: rgba(102, 187, 106, 0.15); color: var(--success); }
+    .status-expired { background: rgba(233, 69, 96, 0.15); color: var(--primary); }
+    #result { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">Aviator<span>Bot</span></div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="index.html#pricing">Pricing</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="dashboard">
+    <div class="dash-card">
+      <h2>Retrieve Your License Key</h2>
+      <div class="input-group">
+        <label>Email used during subscription</label>
+        <input type="email" id="email-input" placeholder="you@example.com">
+      </div>
+      <button class="btn-action" onclick="lookupLicense()">Get My License Key</button>
+      <div id="result"></div>
+    </div>
+
+    <div class="dash-card">
+      <h2>How to Use Your Key</h2>
+      <ol style="font-size: 14px; color: var(--muted); padding-left: 20px; line-height: 2;">
+        <li>Install the Chrome extension</li>
+        <li>Click the extension icon on any Aviator game page</li>
+        <li>Enter your license key when prompted</li>
+        <li>Your tier and features will activate immediately</li>
+      </ol>
+      <p class="info">Key validates every 24 hours. Works on up to 2-3 devices (depending on plan).</p>
+    </div>
+
+    <div class="dash-card">
+      <h2>Manage Devices</h2>
+      <p class="info">If you've reached your device limit, you can deactivate an old device to free up a slot.</p>
+      <div class="input-group" style="margin-top: 12px;">
+        <label>License Key</label>
+        <input type="text" id="key-input" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX">
+      </div>
+      <button class="btn-action" onclick="listDevices()">List Devices</button>
+      <div id="devices-result" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "https://aviator-bot-api.YOUR_WORKER.workers.dev";
+
+    // Auto-fill email from URL param
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("email")) {
+      document.getElementById("email-input").value = params.get("email");
+    }
+
+    async function lookupLicense() {
+      const email = document.getElementById("email-input").value.trim();
+      if (!email || !email.includes("@")) {
+        document.getElementById("result").innerHTML = '<p style="color: var(--primary);">Enter a valid email.</p>';
+        return;
+      }
+
+      document.getElementById("result").innerHTML = '<p style="color: var(--muted);">Looking up...</p>';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/activate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+
+        if (data.license_key) {
+          const statusClass = data.tier !== "free" ? "status-active" : "";
+          document.getElementById("result").innerHTML = `
+            <div class="license-display">
+              <div class="tier">${data.tier || "free"} plan <span class="status-badge status-active">Active</span></div>
+              <div class="key">${data.license_key}</div>
+              <p style="font-size: 11px; color: var(--muted);">Copy this key and enter it in the extension</p>
+            </div>`;
+        } else if (data.error && data.error.includes("already has")) {
+          document.getElementById("result").innerHTML = `
+            <div class="license-display">
+              <div class="tier">${data.tier || "—"} plan</div>
+              <div class="key">${data.license_key || "—"}</div>
+            </div>`;
+        } else {
+          document.getElementById("result").innerHTML = `<p style="color: var(--primary);">${data.error || "Not found"}</p>`;
+        }
+      } catch (err) {
+        document.getElementById("result").innerHTML = `<p style="color: var(--primary);">Error: ${err.message}</p>`;
+      }
+    }
+
+    async function listDevices() {
+      const key = document.getElementById("key-input").value.trim();
+      if (!key) return;
+      document.getElementById("devices-result").innerHTML = '<p style="color: var(--muted);">Loading...</p>';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin?action=devices&key=${encodeURIComponent(key)}`, {
+          headers: { "x-admin-key": "USER_KEY" },
+        });
+        const data = await res.json();
+
+        if (data.devices && data.devices.length > 0) {
+          const html = data.devices.map((d) =>
+            `<div style="padding:8px; border-bottom:1px solid var(--border); font-size:12px;">
+              <strong>${d.label || "Unknown"}</strong><br>
+              <span style="color:var(--muted)">Last seen: ${d.last_seen || "—"} | FP: ${(d.fingerprint || "").slice(0, 12)}...</span>
+            </div>`
+          ).join("");
+          document.getElementById("devices-result").innerHTML = html;
+        } else {
+          document.getElementById("devices-result").innerHTML = '<p style="color: var(--muted);">No devices found.</p>';
+        }
+      } catch (err) {
+        document.getElementById("devices-result").innerHTML = `<p style="color: var(--primary);">Error: ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
