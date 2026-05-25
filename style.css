@@ -108,6 +108,51 @@ nav {
   margin: 0 auto;
 }
 
+/* Hard Truth */
+.hard-truth {
+  padding: 60px 20px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.truth-box {
+  background: linear-gradient(135deg, #1a0a0f, #16162a);
+  border: 1px solid #e9456033;
+  border-radius: 16px;
+  padding: 36px;
+}
+
+.truth-box h2 { color: var(--primary); margin-bottom: 16px; font-size: 24px; }
+.truth-lead { font-size: 16px; color: #fff; margin-bottom: 16px; line-height: 1.7; }
+.truth-box p { color: var(--muted); margin-bottom: 12px; line-height: 1.6; font-size: 14px; }
+.analogy { color: #ccc; font-style: italic; font-size: 15px; margin: 16px 0; }
+
+.truth-list {
+  list-style: none;
+  margin: 20px 0;
+  padding: 0;
+}
+
+.truth-list li {
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.truth-list li::before { content: "⚠ "; color: var(--primary); }
+
+.helpline {
+  margin-top: 20px;
+  padding: 12px;
+  background: rgba(233, 69, 96, 0.08);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.helpline a { color: var(--primary); }
+
 /* Features */
 .features {
   padding: 80px 60px;
