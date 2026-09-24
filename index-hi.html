@@ -163,11 +163,108 @@
     </div>
   </section>
 
+  <!-- Responsibility Gate Modal (Hindi) -->
+  <div id="gate-modal" class="gate-modal hidden">
+    <div class="gate-content">
+      <div id="gate-step-1" class="gate-step">
+        <h2>आगे बढ़ने से पहले...</h2>
+        <p class="gate-warning">Aviator में house edge ~3% है। हज़ारों राउंड के बाद, तुम पैसा हारोगे ही। कोई बॉट इसे बदल नहीं सकता। यह टूल सिर्फ अनुशासन देता है — भावनाओं की जगह गणित।</p>
+        <ul class="gate-checks">
+          <li><label><input type="checkbox" id="check1"> मैं समझता/समझती हूँ कि यह बॉट प्रॉफिट की गारंटी नहीं देता</label></li>
+          <li><label><input type="checkbox" id="check2"> मैं वो पैसा नहीं लगा रहा जो हारने की हैसियत नहीं है</label></li>
+          <li><label><input type="checkbox" id="check3"> मैं स्टॉप-लॉस सेट करूँगा/करूँगी और उसका सम्मान करूँगा/करूँगी</label></li>
+        </ul>
+        <button class="btn-gate" id="gate-next" disabled>मैं समझता हूँ — आगे बढ़ें</button>
+        <p class="gate-helpline">मदद चाहिए? कॉल करें <strong>1800-599-0019</strong> (भारत) | <a href="https://www.gamblersanonymous.org" target="_blank">Gamblers Anonymous</a></p>
+      </div>
+
+      <div id="gate-step-2" class="gate-step hidden">
+        <h2>एक और बात...</h2>
+        <p class="gate-warning">सच में — ज़्यादातर जुआरी हारते हैं। सिग्नल ग्रुप धोखा हैं। "गारंटीड प्रॉफिट" झूठ है। यह बॉट गणित देता है, चमत्कार नहीं।</p>
+        <p class="gate-question">छोटा सा टेस्ट — साबित करो कि तुमने पढ़ा:</p>
+        <p class="gate-math-q" id="mathQuestion"></p>
+        <input type="text" id="mathAnswer" placeholder="अपना जवाब लिखें" class="gate-input">
+        <button class="btn-gate" id="gate-verify">जवाब दें और आगे बढ़ें</button>
+        <p id="gate-error" class="gate-error hidden">गलत जवाब। सवाल दोबारा पढ़ो।</p>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <p>Aviator Strategy Bot — केवल शैक्षिक और मनोरंजन उद्देश्यों के लिए। जुआ में नुकसान का जोखिम है।</p>
     <p><a href="dashboard.html">डैशबोर्ड</a> | <a href="mailto:support@aviator-bot.com">सहायता</a></p>
   </footer>
 
   <script src="app.js"></script>
+  <script>
+  (function() {
+    const modal = document.getElementById('gate-modal');
+    const step1 = document.getElementById('gate-step-1');
+    const step2 = document.getElementById('gate-step-2');
+    const nextBtn = document.getElementById('gate-next');
+    const verifyBtn = document.getElementById('gate-verify');
+    const checks = [document.getElementById('check1'), document.getElementById('check2'), document.getElementById('check3')];
+    const mathQ = document.getElementById('mathQuestion');
+    const mathA = document.getElementById('mathAnswer');
+    const gateError = document.getElementById('gate-error');
+
+    let gateTarget = null;
+    let correctAnswer = '';
+
+    const questions = [
+      { q: "Aviator में house edge कितना प्रतिशत है?", a: "3" },
+      { q: "क्या यह बॉट प्रॉफिट की गारंटी देता है? (हाँ/नहीं)", a: "नहीं" },
+      { q: "खेलने से पहले क्या सेट करना चाहिए? (स्टॉप-____)", a: "लॉस" },
+      { q: "लंबे समय में किसी भी स्ट्रेटेजी से क्या होगा — जीत या हार?", a: "हार" },
+    ];
+
+    function showGate(target) {
+      gateTarget = target;
+      modal.classList.remove('hidden');
+      step1.classList.remove('hidden');
+      step2.classList.add('hidden');
+      nextBtn.disabled = true;
+      checks.forEach(c => c.checked = false);
+      gateError.classList.add('hidden');
+      mathA.value = '';
+      const q = questions[Math.floor(Math.random() * questions.length)];
+      mathQ.textContent = q.q;
+      correctAnswer = q.a;
+    }
+
+    checks.forEach(c => {
+      c.addEventListener('change', () => { nextBtn.disabled = !checks.every(cb => cb.checked); });
+    });
+
+    nextBtn.addEventListener('click', () => { step1.classList.add('hidden'); step2.classList.remove('hidden'); });
+
+    verifyBtn.addEventListener('click', () => {
+      const answer = mathA.value.trim().toLowerCase().replace('%', '').replace('~', '');
+      if (answer.includes(correctAnswer)) {
+        modal.classList.add('hidden');
+        sessionStorage.setItem('gate_passed', '1');
+        if (gateTarget) {
+          if (gateTarget.startsWith('#')) document.querySelector(gateTarget)?.scrollIntoView({ behavior: 'smooth' });
+          else window.location.href = gateTarget;
+        }
+      } else {
+        gateError.classList.remove('hidden');
+        mathA.value = '';
+      }
+    });
+
+    mathA.addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyBtn.click(); });
+
+    document.querySelectorAll('.hero-cta a, .btn-plan, .btn-featured').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (sessionStorage.getItem('gate_passed')) return;
+        e.preventDefault();
+        showGate(el.getAttribute('href') || '#pricing');
+      });
+    });
+
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+  })();
+  </script>
 </body>
 </html>

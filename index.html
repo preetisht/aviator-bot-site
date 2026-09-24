@@ -156,11 +156,129 @@
     </div>
   </section>
 
+  <!-- Responsibility Gate Modal -->
+  <div id="gate-modal" class="gate-modal hidden">
+    <div class="gate-content">
+      <div id="gate-step-1" class="gate-step">
+        <h2>Before you continue...</h2>
+        <p class="gate-warning">The house edge in Aviator is ~3%. Over thousands of rounds, you WILL lose money. No bot changes that. This tool only helps you play with discipline instead of emotion.</p>
+        <ul class="gate-checks">
+          <li><label><input type="checkbox" id="check1"> I understand this bot does NOT guarantee profit</label></li>
+          <li><label><input type="checkbox" id="check2"> I am NOT using money I can't afford to lose</label></li>
+          <li><label><input type="checkbox" id="check3"> I will set a stop-loss and actually respect it</label></li>
+        </ul>
+        <button class="btn-gate" id="gate-next" disabled>I Understand — Continue</button>
+        <p class="gate-helpline">Need help? Call <strong>1800-599-0019</strong> (India) or visit <a href="https://www.gamblersanonymous.org" target="_blank">Gamblers Anonymous</a></p>
+      </div>
+
+      <div id="gate-step-2" class="gate-step hidden">
+        <h2>One more thing...</h2>
+        <p class="gate-warning">Seriously — most people who gamble lose. Signal groups are scams. "Guaranteed profit" is a lie. This bot gives you math, not miracles.</p>
+        <p class="gate-question">Quick check — prove you read this:</p>
+        <p class="gate-math-q" id="mathQuestion"></p>
+        <input type="text" id="mathAnswer" placeholder="Type your answer" class="gate-input">
+        <button class="btn-gate" id="gate-verify">Verify & Continue</button>
+        <p id="gate-error" class="gate-error hidden">Wrong answer. Read the question again.</p>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <p>Aviator Strategy Bot — For educational and entertainment purposes only. Gambling involves risk.</p>
     <p><a href="dashboard.html">Dashboard</a> | <a href="mailto:support@aviator-bot.com">Support</a></p>
   </footer>
 
   <script src="app.js"></script>
+  <script>
+  (function() {
+    const modal = document.getElementById('gate-modal');
+    const step1 = document.getElementById('gate-step-1');
+    const step2 = document.getElementById('gate-step-2');
+    const nextBtn = document.getElementById('gate-next');
+    const verifyBtn = document.getElementById('gate-verify');
+    const checks = [document.getElementById('check1'), document.getElementById('check2'), document.getElementById('check3')];
+    const mathQ = document.getElementById('mathQuestion');
+    const mathA = document.getElementById('mathAnswer');
+    const gateError = document.getElementById('gate-error');
+
+    let gateTarget = null;
+    let correctAnswer = '';
+
+    // Generate a responsibility question (not math — comprehension)
+    const questions = [
+      { q: "What is the house edge in Aviator?", a: "3" },
+      { q: "Does this bot guarantee profit? (yes/no)", a: "no" },
+      { q: "What should you set before playing? (stop-____)", a: "loss" },
+      { q: "Over time, will you win or lose with any strategy?", a: "lose" },
+    ];
+
+    function showGate(target) {
+      gateTarget = target;
+      modal.classList.remove('hidden');
+      step1.classList.remove('hidden');
+      step2.classList.add('hidden');
+      nextBtn.disabled = true;
+      checks.forEach(c => c.checked = false);
+      gateError.classList.add('hidden');
+      mathA.value = '';
+
+      const q = questions[Math.floor(Math.random() * questions.length)];
+      mathQ.textContent = q.q;
+      correctAnswer = q.a;
+    }
+
+    // Check all boxes to enable continue
+    checks.forEach(c => {
+      c.addEventListener('change', () => {
+        nextBtn.disabled = !checks.every(cb => cb.checked);
+      });
+    });
+
+    // Step 1 -> Step 2
+    nextBtn.addEventListener('click', () => {
+      step1.classList.add('hidden');
+      step2.classList.remove('hidden');
+    });
+
+    // Step 2 verify
+    verifyBtn.addEventListener('click', () => {
+      const answer = mathA.value.trim().toLowerCase().replace('%', '').replace('~', '');
+      if (answer.includes(correctAnswer)) {
+        modal.classList.add('hidden');
+        // Store that user passed the gate this session
+        sessionStorage.setItem('gate_passed', '1');
+        // Navigate to target
+        if (gateTarget) {
+          if (gateTarget.startsWith('#')) {
+            document.querySelector(gateTarget)?.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            window.location.href = gateTarget;
+          }
+        }
+      } else {
+        gateError.classList.remove('hidden');
+        mathA.value = '';
+      }
+    });
+
+    // Allow Enter key on input
+    mathA.addEventListener('keydown', (e) => { if (e.key === 'Enter') verifyBtn.click(); });
+
+    // Intercept CTA clicks
+    document.querySelectorAll('.hero-cta a, .btn-plan, .btn-featured').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (sessionStorage.getItem('gate_passed')) return; // already passed
+        e.preventDefault();
+        const target = el.getAttribute('href') || '#pricing';
+        showGate(target);
+      });
+    });
+
+    // Close modal on outside click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.add('hidden');
+    });
+  })();
+  </script>
 </body>
 </html>

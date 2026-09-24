@@ -307,6 +307,83 @@ footer {
 
 footer a { color: var(--primary); text-decoration: none; }
 
+/* Responsibility Gate Modal */
+.gate-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.gate-modal.hidden { display: none; }
+
+.gate-content {
+  background: var(--card);
+  border: 1px solid var(--primary);
+  border-radius: 16px;
+  padding: 36px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 0 60px rgba(233, 69, 96, 0.2);
+}
+
+.gate-step.hidden { display: none; }
+.gate-content h2 { color: var(--primary); margin-bottom: 16px; font-size: 22px; }
+.gate-warning { color: #fff; font-size: 14px; line-height: 1.7; margin-bottom: 20px; }
+
+.gate-checks { list-style: none; padding: 0; margin-bottom: 20px; }
+.gate-checks li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+}
+.gate-checks label { cursor: pointer; display: flex; align-items: center; gap: 10px; }
+.gate-checks input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); }
+
+.btn-gate {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: opacity 0.2s;
+}
+
+.btn-gate:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-gate:not(:disabled):hover { opacity: 0.9; }
+
+.gate-helpline { font-size: 11px; color: var(--muted); text-align: center; }
+.gate-helpline a { color: var(--primary); }
+
+.gate-question { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+.gate-math-q { color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+
+.gate-input {
+  width: 100%;
+  padding: 12px;
+  background: var(--darker);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.gate-input:focus { border-color: var(--primary); outline: none; }
+.gate-error { color: var(--primary); font-size: 12px; text-align: center; }
+.gate-error.hidden { display: none; }
+
 /* Responsive */
 @media (max-width: 768px) {
   nav { padding: 16px 20px; }
